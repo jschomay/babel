@@ -1,14 +1,14 @@
 {
-  "name": "game",
-  "version": "2.0.0",
-  "description": "A simple template project to quickly get up and running with Phaser.",
-  "main": "deploay/index.html",
+  "name": "babel",
+  "version": "0.0.1",
+  "description": "HTML5 game using phaser",
+  "main": "deploy/index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "http://github.com/gamecook/phaser-template",
-  "author": "Jesse Freeman",
-  "license": "MIT",
+  "repository": "https://github.com/jschomay/babel",
+  "author": "Jeff Schomay",
+  "license": "",
   "devDependencies": {
       "grunt-open": "~0.2.3",
       "grunt": "~0.4.2",

@@ -19,7 +19,7 @@ module.exports = function (grunt) {
                 src: [  "src/lib/**/*.js",
                     "src/game/**/*.js"
                      ],
-                dest: 'deploy/js/<%= pkg.name %>.js'
+                dest: 'deploy/js/game.js'
             }
         },
         watch: {
