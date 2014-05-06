@@ -2,7 +2,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-open');
-    grunt.loadNpmTasks('grunt-contrib-concat');
+    // grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-browserify');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -14,17 +15,23 @@ module.exports = function (grunt) {
                 }
             }
         },
-        concat: {
+        browserify: {
             dist: {
-                src: [  "src/lib/**/*.js",
-                    "src/game/**/*.js"
-                     ],
+                src: ["src/game/**/*.js"],
                 dest: 'deploy/js/game.js'
             }
         },
+        // concat: {
+        //     dist: {
+        //         src: [  "src/lib/**/*.js",
+        //             "src/game/**/*.js"
+        //              ],
+        //         dest: 'deploy/js/game.js'
+        //     }
+        // },
         watch: {
             files: 'src/**/*.js',
-            tasks: ['concat']
+            tasks: ['browserify']
         },
         open: {
             dev: {
@@ -33,6 +40,6 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('default', ['concat', 'connect', 'open', 'watch']);
+    grunt.registerTask('default', ['browserify', 'connect', 'open', 'watch']);
 
 }

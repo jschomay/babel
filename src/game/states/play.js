@@ -1,14 +1,3 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// This example uses the Phaser 2.0.4 framework
-
-// Copyright © 2014 John Watson
-// Licensed under the terms of the MIT License
-
-
-var game = new Phaser.Game(848, 450, Phaser.AUTO, 'game');
-GameState = require('./states/play')
-game.state.add('game', GameState, true);
-},{"./states/play":2}],2:[function(require,module,exports){
 module.exports = GameState = function(game) {
 };
 
@@ -163,5 +152,3 @@ GameState.prototype.upInputIsActive = function(duration) {
 
     return isActive;
 };
-
-},{}]},{},[1,2])
