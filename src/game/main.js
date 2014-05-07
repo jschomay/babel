@@ -4,6 +4,6 @@
 // Licensed under the terms of the MIT License
 
 
-var game = new Phaser.Game(848, 450, Phaser.AUTO, 'game');
+var game = new Phaser.Game(800, 500, Phaser.AUTO, 'game');
 GameState = require('./states/play')
 game.state.add('game', GameState, true);

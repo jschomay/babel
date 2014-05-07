@@ -5,7 +5,7 @@
 // Licensed under the terms of the MIT License
 
 
-var game = new Phaser.Game(848, 450, Phaser.AUTO, 'game');
+var game = new Phaser.Game(800, 500, Phaser.AUTO, 'game');
 GameState = require('./states/play')
 game.state.add('game', GameState, true);
 },{"./states/play":2}],2:[function(require,module,exports){
@@ -14,8 +14,8 @@ module.exports = GameState = function(game) {
 
 // Load images and sounds
 GameState.prototype.preload = function() {
-    this.game.load.image('ground', '/assets/gfx/ground.png');
-    this.game.load.image('player', '/assets/gfx/player.png');
+    this.game.load.image('ground', '/assets/ground.png');
+    this.game.load.image('player', '/assets/player.png');
 };
 
 // Setup the example

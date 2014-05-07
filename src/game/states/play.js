@@ -3,8 +3,8 @@ module.exports = GameState = function(game) {
 
 // Load images and sounds
 GameState.prototype.preload = function() {
-    this.game.load.image('ground', '/assets/gfx/ground.png');
-    this.game.load.image('player', '/assets/gfx/player.png');
+    this.game.load.image('ground', '/assets/ground.png');
+    this.game.load.image('player', '/assets/player.png');
 };
 
 // Setup the example

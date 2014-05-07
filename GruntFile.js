@@ -29,10 +29,17 @@ module.exports = function (grunt) {
         //         dest: 'deploy/js/game.js'
         //     }
         // },
+        // watch: {
+        //     files: 'src/**/*.js',
+        //     tasks: ['browserify']
+        // },
         watch: {
-            files: 'src/**/*.js',
+            options: {
+              livereload: true,
+            },
+            files: ['src/**/*.js', 'deploy/css/*', 'deploy/assets/**/*'],
             tasks: ['browserify']
-        },
+          },
         open: {
             dev: {
                 path: 'http://localhost:8080/index.html'
