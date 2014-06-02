@@ -13,9 +13,9 @@ GameState.prototype.create = function() {
     this.game.stage.backgroundColor = 0x4488cc;
 
     // Define movement constants
-    this.MAX_SPEED = 500; // pixels/second
+    this.MAX_SPEED = 300; // pixels/second
     this.ACCELERATION = 1500; // pixels/second/second
-    this.DRAG = 600; // pixels/second
+    this.DRAG = 1000; // pixels/second
     this.GRAVITY = 2600; // pixels/second/second
     this.JUMP_SPEED = -1000; // pixels/second (negative y is up)
 
@@ -27,6 +27,9 @@ GameState.prototype.create = function() {
 
     // Make player collide with world boundaries so he doesn't leave the stage
     this.player.body.collideWorldBounds = true;
+
+    // player can pass through objects from the bottom (to jump onto platforms)
+    this.player.body.checkCollision.up = false;
 
     // Set player minimum and maximum movement speed
     this.player.body.maxVelocity.setTo(this.MAX_SPEED, this.MAX_SPEED * 10); // x, y
@@ -47,6 +50,13 @@ GameState.prototype.create = function() {
         groundBlock.body.allowGravity = false;
         this.ground.add(groundBlock);
     }
+
+    // plastform
+    var platform = this.game.add.sprite(this.player.x, this.player.y-64, 'ground');
+    this.game.physics.enable(platform, Phaser.Physics.ARCADE);
+    platform.body.immovable = true;
+    platform.body.allowGravity = false;
+    this.ground.add(platform);
 
     // Capture certain keys to prevent their default actions in the browser.
     // This is only necessary because this is an HTML5 game. Games on other
