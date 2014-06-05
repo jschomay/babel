@@ -22,6 +22,13 @@ GameState.prototype.create = function() {
     // Create a player sprite
     this.player = this.game.add.sprite(this.game.width/2, this.game.height - 64, 'player');
 
+    // invisible helper object to determine if scaffolding exists in the direction pressed
+    this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
+    this.game.physics.enable(this.targetPosition, Phaser.Physics.ARCADE);
+    this.targetPosition.body.allowGravity = false;
+    this.targetPosition.body.setSize(10, 10, this.targetPosition.width/2-5, this.targetPosition.height/2-5);
+
+
     // Enable physics on the player
     this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
 
@@ -104,12 +111,17 @@ GameState.prototype.update = function() {
     // Collide the player with the ground
     this.game.physics.arcade.collide(this.player, this.ground);
 
+    // targetPosition follows player
+    this.targetPosition.body.reset(this.player.x, this.player.y);
+
     if (this.leftInputIsActive()) {
         // If the LEFT key is down, set the player velocity to move left
         this.player.body.acceleration.x = -this.ACCELERATION;
+        this.targetPosition.body.reset(this.player.x - this.player.width, this.player.y);
     } else if (this.rightInputIsActive()) {
         // If the RIGHT key is down, set the player velocity to move right
         this.player.body.acceleration.x = this.ACCELERATION;
+        this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y);
     } else {
         this.player.body.acceleration.x = 0;
     }
@@ -117,9 +129,20 @@ GameState.prototype.update = function() {
     // Set a variable that is true when the player is touching the ground
     var onTheGround = this.player.body.touching.down;
 
-    if (onTheGround && this.upInputIsActive()) {
+    // if (onTheGround && this.upInputIsActive()) {
         // Jump when the player is touching the ground and the up arrow is pressed
-        this.player.body.velocity.y = this.JUMP_SPEED;
+        // this.player.body.velocity.y = this.JUMP_SPEED;
+    // }
+    if (this.upInputIsActive()) {
+        this.player.body.acceleration.x = 0;
+        this.targetPosition.body.reset(this.player.x, this.player.y - this.player.height*2);
+    }
+
+    // Collide the targetPosition with the ground
+    if(this.game.physics.arcade.overlap(this.targetPosition, this.ground)) {
+        game.stage.backgroundColor = '#992d2d';
+    } else {
+        game.stage.backgroundColor = 0x4488cc;
     }
 };
 
@@ -162,3 +185,12 @@ GameState.prototype.upInputIsActive = function(duration) {
 
     return isActive;
 };
+
+GameState.prototype.render = function render() {
+
+    // game.debug.bodyInfo(sprite1, 32, 32);
+
+    this.game.debug.body(this.targetPosition);
+    this.game.debug.body(this.player);
+
+}
