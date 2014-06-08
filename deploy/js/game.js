@@ -16,7 +16,7 @@ module.exports = GameState = function(game) {
 
 // Load images and sounds
 GameState.prototype.preload = function() {
-    this.game.load.image('ground', '/assets/ground.png');
+    this.game.load.image('scaffold', '/assets/scaffold.png');
     this.game.load.image('player', '/assets/player.png');
 };
 
@@ -34,6 +34,11 @@ GameState.prototype.create = function() {
 
     // Create a player sprite
     this.player = this.game.add.sprite(this.game.width/2, this.game.height - 64, 'player');
+    this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
+    this.player.body.collideWorldBounds = true;
+    this.player.body.checkCollision.up = false;
+    this.player.body.maxVelocity.setTo(this.MAX_SPEED, this.MAX_SPEED * 10); // x, y
+    this.player.body.drag.setTo(this.DRAG, 0); // x, y
 
     // invisible helper object to determine if scaffolding exists in the direction pressed
     this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
@@ -41,42 +46,26 @@ GameState.prototype.create = function() {
     this.targetPosition.body.allowGravity = false;
     this.targetPosition.body.setSize(10, 10, this.targetPosition.width/2-5, this.targetPosition.height/2-5);
 
-
-    // Enable physics on the player
-    this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
-
-    // Make player collide with world boundaries so he doesn't leave the stage
-    this.player.body.collideWorldBounds = true;
-
-    // player can pass through objects from the bottom (to jump onto platforms)
-    this.player.body.checkCollision.up = false;
-
-    // Set player minimum and maximum movement speed
-    this.player.body.maxVelocity.setTo(this.MAX_SPEED, this.MAX_SPEED * 10); // x, y
-
-    // Add drag to the player that slows them down when they are not accelerating
-    this.player.body.drag.setTo(this.DRAG, 0); // x, y
-
     // Since we're jumping we need gravity
     this.game.physics.arcade.gravity.y = this.GRAVITY;
 
-    // Create some ground for the player to walk on
-    this.ground = this.game.add.group();
-    for(var x = 0; x < this.game.width; x += 32) {
-        // Add the ground blocks, enable physics on each, make them immovable
-        var groundBlock = this.game.add.sprite(x, this.game.height - 32, 'ground');
-        this.game.physics.enable(groundBlock, Phaser.Physics.ARCADE);
-        groundBlock.body.immovable = true;
-        groundBlock.body.allowGravity = false;
-        this.ground.add(groundBlock);
+
+    this.scaffoldPool = this.game.add.group();
+
+    // start scaffold pool with 100 pieces
+    for(var i = 0; i < 100; i++) {
+        // addScaffoldToPool.call(this);
+        this.addScaffoldToPool();
     }
 
-    // plastform
-    var platform = this.game.add.sprite(this.player.x, this.player.y-64, 'ground');
-    this.game.physics.enable(platform, Phaser.Physics.ARCADE);
-    platform.body.immovable = true;
-    platform.body.allowGravity = false;
-    this.ground.add(platform);
+    // lay some initial scaffolding
+    for(var x = 0; x < this.game.width; x += 32) {
+        this.buildScaffold(x, this.game.height - 32);
+    }
+
+    // add testing plastform
+    this.buildScaffold(this.player.x, this.player.y-64);
+    this.buildScaffold(this.player.x+32, this.player.y-64);
 
     // Capture certain keys to prevent their default actions in the browser.
     // This is only necessary because this is an HTML5 game. Games on other
@@ -98,6 +87,37 @@ GameState.prototype.create = function() {
     );
 };
 
+GameState.prototype.addScaffoldToPool = function(){
+    var scaffold = this.game.add.sprite(0, 0, 'scaffold');
+    this.scaffoldPool.add(scaffold);
+
+    // Enable physics on the scaffold
+    this.game.physics.enable(scaffold, Phaser.Physics.ARCADE);
+    scaffold.body.immovable = true;
+    scaffold.body.allowGravity = false;
+
+    // Set its initial state to "dead".
+    scaffold.kill();
+
+    scaffold.checkWorldBounds = true;
+    scaffold.outOfBoundsKill = true;
+
+    return scaffold;
+};
+
+GameState.prototype.buildScaffold = function (x, y) {
+    // Get a dead scaffold from the pool
+    var scaffold = this.scaffoldPool.getFirstDead();
+    if (scaffold === null) {
+       scaffold = addScaffoldToPool();
+    }
+    scaffold.revive();
+    scaffold.reset(x, y);
+
+    return scaffold;
+};
+
+
 // This function draws horizontal lines across the stage
 GameState.prototype.drawHeightMarkers = function() {
     // Create a bitmap the same size as the stage
@@ -115,14 +135,18 @@ GameState.prototype.drawHeightMarkers = function() {
     this.game.add.image(0, 0, bitmap);
 };
 
+GameState.prototype.buildAbove = function() {
+
+};
+
 // The update() method is called every frame
 GameState.prototype.update = function() {
     if (this.game.time.fps !== 0) {
         this.fpsText.setText(this.game.time.fps + ' FPS');
     }
 
-    // Collide the player with the ground
-    this.game.physics.arcade.collide(this.player, this.ground);
+    // Collide the player with the scaffold
+    this.game.physics.arcade.collide(this.player, this.scaffoldPool);
 
     // targetPosition follows player
     this.targetPosition.body.reset(this.player.x, this.player.y);
@@ -139,16 +163,16 @@ GameState.prototype.update = function() {
         this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y);
     }
 
-    // Set a variable that is true when the player is touching the ground
-    var onTheGround = this.player.body.touching.down;
+    // Set a variable that is true when the player is touching the scaffold
+    var climbing = !this.player.body.touching.down;
 
-    if (onTheGround && this.upInputIsActive()) {
+    if (!climbing && this.upInputIsActive()) {
         this.player.body.acceleration.x = 0;
         this.targetPosition.body.reset(this.player.x, this.player.y - this.player.height*2);
     }
 
-    // Collide the targetPosition with the ground
-    if(this.game.physics.arcade.overlap(this.targetPosition, this.ground)) {
+    // Collide the targetPosition with the scaffold
+    if(this.game.physics.arcade.overlap(this.targetPosition, this.scaffoldPool)) {
         game.stage.backgroundColor = '#992d2d';
     } else {
         game.stage.backgroundColor = 0x4488cc;
