@@ -27,6 +27,24 @@ GameState.prototype.create = function() {
     this.player.body.maxVelocity.setTo(this.MAX_SPEED, this.MAX_SPEED * 10); // x, y
     this.player.body.drag.setTo(this.DRAG, 0); // x, y
 
+    // player movements
+    // todo - these should ideally be on the player's prototype, not sure how to access it yet though
+    var gameState = this;
+    this.player.walkLeft = _.bind(function() {
+        this.body.acceleration.x += -gameState.ACCELERATION;
+    }, this.player);
+
+    this.player.walkRight = _.bind(function() {
+        this.body.acceleration.x += gameState.ACCELERATION;
+    }, this.player);
+
+    this.player.climb = _.bind(function() {
+        this.climbing = true;
+        var climbTween = game.add.tween(this.body);
+        climbTween.to({y: (this.body.y - this.height*3)}, 1000, Phaser.Easing.Linear.None, true);
+        climbTween.onComplete.add(function(){this.climbing = false;}, this);
+    }, this.player);
+
     // invisible helper object to determine if scaffolding exists in the direction pressed
     this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
     this.game.physics.enable(this.targetPosition, Phaser.Physics.ARCADE);
@@ -50,9 +68,6 @@ GameState.prototype.create = function() {
         this.buildScaffold(x, this.game.height - 32);
     }
 
-    // add testing plastform
-    this.buildScaffold(this.player.x, this.player.y-64);
-    this.buildScaffold(this.player.x+32, this.player.y-64);
 
     // Capture certain keys to prevent their default actions in the browser.
     // This is only necessary because this is an HTML5 game. Games on other
@@ -96,7 +111,8 @@ GameState.prototype.buildScaffold = function (x, y) {
     // Get a dead scaffold from the pool
     var scaffold = this.scaffoldPool.getFirstDead();
     if (scaffold === null) {
-       scaffold = addScaffoldToPool();
+        console.log("increasing scaffold pool to", this.scaffoldPool.length);
+        scaffold = this.addScaffoldToPool();
     }
     scaffold.revive();
     scaffold.reset(x, y);
@@ -122,9 +138,6 @@ GameState.prototype.drawHeightMarkers = function() {
     this.game.add.image(0, 0, bitmap);
 };
 
-GameState.prototype.buildAbove = function() {
-
-};
 
 // The update() method is called every frame
 GameState.prototype.update = function() {
@@ -139,30 +152,39 @@ GameState.prototype.update = function() {
     this.targetPosition.body.reset(this.player.x, this.player.y);
 
     this.player.body.acceleration.x = 0;
-    if (this.leftInputIsActive()) {
-        // If the LEFT key is down, set the player velocity to move left
-        this.player.body.acceleration.x += -this.ACCELERATION;
-        this.targetPosition.body.reset(this.player.x - this.player.width, this.player.y);
+
+    // update inputs
+
+    // TODO - DON'T MOVE IF BUILDING
+    if (!this.player.climbing && this.leftInputIsActive()) {
+        this.targetPosition.body.reset(this.player.x - this.player.width, this.player.y + this.player.height);
+        this.buildOrMove(this.player.walkLeft);
     }
-    if (this.rightInputIsActive()) {
-        // If the RIGHT key is down, set the player velocity to move right
-        this.player.body.acceleration.x += this.ACCELERATION;
-        this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y);
+    if (!this.player.climbing && this.rightInputIsActive()) {
+        this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y + this.player.height);
+        this.buildOrMove(this.player.walkRight);
     }
 
-    // Set a variable that is true when the player is touching the scaffold
-    var climbing = !this.player.body.touching.down;
-
-    if (!climbing && this.upInputIsActive()) {
+    if (!this.player.climbing && this.upInputIsActive()) {
         this.player.body.acceleration.x = 0;
         this.targetPosition.body.reset(this.player.x, this.player.y - this.player.height*2);
+        this.buildOrMove(this.player.climb);
     }
+};
 
+GameState.prototype.buildOrMove = function(moveFn) {
     // Collide the targetPosition with the scaffold
     if(this.game.physics.arcade.overlap(this.targetPosition, this.scaffoldPool)) {
-        game.stage.backgroundColor = '#992d2d';
+        // scaffold exists to move to
+        moveFn();
     } else {
-        game.stage.backgroundColor = 0x4488cc;
+        // stop and build
+        this.player.body.acceleration.x = 0;
+        
+        // TODO - USE TARGET POS MATH TO BUILD SCAFFOLD IN RIGHT PLACE
+        this.buildScaffold(this.targetPosition.body.x, this.targetPosition.body.y);
+
+        // TODO - DON'T BUILD IF IT WILL BE OFF SCREEN
     }
 };
 
@@ -212,5 +234,5 @@ GameState.prototype.render = function render() {
 
     this.game.debug.body(this.targetPosition);
     this.game.debug.body(this.player);
-
-}
+    // this.scaffoldPool.forEach(function(scaffold){this.game.debug.body(scaffold);},this);
+};
