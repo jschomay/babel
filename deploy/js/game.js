@@ -127,26 +127,22 @@ GameState.prototype.update = function() {
     // targetPosition follows player
     this.targetPosition.body.reset(this.player.x, this.player.y);
 
+    this.player.body.acceleration.x = 0;
     if (this.leftInputIsActive()) {
         // If the LEFT key is down, set the player velocity to move left
-        this.player.body.acceleration.x = -this.ACCELERATION;
+        this.player.body.acceleration.x += -this.ACCELERATION;
         this.targetPosition.body.reset(this.player.x - this.player.width, this.player.y);
-    } else if (this.rightInputIsActive()) {
+    }
+    if (this.rightInputIsActive()) {
         // If the RIGHT key is down, set the player velocity to move right
-        this.player.body.acceleration.x = this.ACCELERATION;
+        this.player.body.acceleration.x += this.ACCELERATION;
         this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y);
-    } else {
-        this.player.body.acceleration.x = 0;
     }
 
     // Set a variable that is true when the player is touching the ground
     var onTheGround = this.player.body.touching.down;
 
-    // if (onTheGround && this.upInputIsActive()) {
-        // Jump when the player is touching the ground and the up arrow is pressed
-        // this.player.body.velocity.y = this.JUMP_SPEED;
-    // }
-    if (this.upInputIsActive()) {
+    if (onTheGround && this.upInputIsActive()) {
         this.player.body.acceleration.x = 0;
         this.targetPosition.body.reset(this.player.x, this.player.y - this.player.height*2);
     }
