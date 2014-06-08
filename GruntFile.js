@@ -4,6 +4,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-open');
     // grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-bower-concat');
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -19,6 +20,11 @@ module.exports = function (grunt) {
             dist: {
                 src: ["src/game/**/*.js"],
                 dest: 'deploy/js/game.js'
+            }
+        },
+        bower_concat: {
+            all: {
+                dest: 'deploy/js/vendor.js'
             }
         },
         // concat: {
@@ -47,6 +53,6 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('default', ['browserify', 'connect', 'open', 'watch']);
+    grunt.registerTask('default', ['browserify', 'bower_concat', 'connect', 'open', 'watch']);
 
-}
+};
