@@ -81,6 +81,8 @@ GameState.prototype.addScaffoldToPool = function(){
 };
 
 GameState.prototype.buildScaffold = function (x, y) {
+    var buildTime = Phaser.Timer.SECOND * 0.5;
+    this.player.building = true;
     // Get a dead scaffold from the pool
     var scaffold = this.scaffoldPool.getFirstDead();
     if (scaffold === null) {
@@ -89,6 +91,12 @@ GameState.prototype.buildScaffold = function (x, y) {
     }
     scaffold.revive();
     scaffold.reset(x, y);
+    scaffold.alpha = 0;
+    // fade in (temp animation)
+    this.game.add.tween(scaffold).to( { alpha: 1 }, buildTime, Phaser.Easing.Linear.None, true);
+
+    function stopBuilding() {this.player.building = false;}
+    this.game.time.events.add(buildTime, stopBuilding, this);
 
     return scaffold;
 };
@@ -128,17 +136,16 @@ GameState.prototype.update = function() {
 
     // update inputs
 
-    // TODO - DON'T MOVE IF BUILDING
-    if (!this.player.climbing && this.leftInputIsActive()) {
+    if (!this.player.isBusy() && this.leftInputIsActive()) {
         this.targetPosition.body.reset(this.player.x - this.player.width, this.player.y + this.player.height);
         this.buildOrMove(this.player.walkLeft);
     }
-    if (!this.player.climbing && this.rightInputIsActive()) {
+    if (!this.player.isBusy() && this.rightInputIsActive()) {
         this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y + this.player.height);
         this.buildOrMove(this.player.walkRight);
     }
 
-    if (!this.player.climbing && this.upInputIsActive()) {
+    if (!this.player.isBusy() && this.upInputIsActive()) {
         this.player.body.acceleration.x = 0;
         this.targetPosition.body.reset(this.player.x, this.player.y - this.player.height*2);
         this.buildOrMove(this.player.climb);

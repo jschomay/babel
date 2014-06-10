@@ -34,6 +34,10 @@ Player.prototype.climb = function() {
     }, this);
 };
 
+Player.prototype.isBusy = function() {
+    return !!this.climbing || !!this.building;
+};
+
 
 Player.prototype.update = function() {
 
