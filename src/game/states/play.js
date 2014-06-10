@@ -12,38 +12,13 @@ GameState.prototype.create = function() {
     // Set stage background to something sky colored
     this.game.stage.backgroundColor = 0x4488cc;
 
-    // Define movement constants
-    this.MAX_SPEED = 300; // pixels/second
-    this.ACCELERATION = 1500; // pixels/second/second
-    this.DRAG = 1000; // pixels/second
     this.GRAVITY = 2600; // pixels/second/second
-    this.JUMP_SPEED = -1000; // pixels/second (negative y is up)
+    this.game.physics.arcade.gravity.y = this.GRAVITY;
 
-    // Create a player sprite
-    this.player = this.game.add.sprite(this.game.width/2, this.game.height - 64, 'player');
-    this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
-    this.player.body.collideWorldBounds = true;
-    this.player.body.checkCollision.up = false;
-    this.player.body.maxVelocity.setTo(this.MAX_SPEED, this.MAX_SPEED * 10); // x, y
-    this.player.body.drag.setTo(this.DRAG, 0); // x, y
+    var Player = require('../entities/player');
+    this.player = new Player(this.game, this.game.width/2, this.game.height - 64);
+    this.game.add.existing(this.player);
 
-    // player movements
-    // todo - these should ideally be on the player's prototype, not sure how to access it yet though
-    var gameState = this;
-    this.player.walkLeft = _.bind(function() {
-        this.body.acceleration.x += -gameState.ACCELERATION;
-    }, this.player);
-
-    this.player.walkRight = _.bind(function() {
-        this.body.acceleration.x += gameState.ACCELERATION;
-    }, this.player);
-
-    this.player.climb = _.bind(function() {
-        this.climbing = true;
-        var climbTween = game.add.tween(this.body);
-        climbTween.to({y: (this.body.y - this.height*3)}, 1000, Phaser.Easing.Linear.None, true);
-        climbTween.onComplete.add(function(){this.climbing = false;}, this);
-    }, this.player);
 
     // invisible helper object to determine if scaffolding exists in the direction pressed
     this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
@@ -51,8 +26,6 @@ GameState.prototype.create = function() {
     this.targetPosition.body.allowGravity = false;
     this.targetPosition.body.setSize(10, 10, this.targetPosition.width/2-5, this.targetPosition.height/2-5);
 
-    // Since we're jumping we need gravity
-    this.game.physics.arcade.gravity.y = this.GRAVITY;
 
 
     this.scaffoldPool = this.game.add.group();
@@ -176,7 +149,7 @@ GameState.prototype.buildOrMove = function(moveFn) {
     // Collide the targetPosition with the scaffold
     if(this.game.physics.arcade.overlap(this.targetPosition, this.scaffoldPool)) {
         // scaffold exists to move to
-        moveFn();
+        moveFn.call(this.player);
     } else {
         // stop and build
         this.player.body.acceleration.x = 0;

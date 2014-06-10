@@ -5,7 +5,7 @@
 
 
 var game = new Phaser.Game(800, 500, Phaser.AUTO, 'game');
-GameState = require('./states/play')
+GameState = require('./states/play');
 game.state.add('game', GameState, true);
 
 window.game = game;

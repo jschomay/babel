@@ -20,6 +20,11 @@ module.exports = function (grunt) {
             dist: {
                 src: ["src/game/**/*.js"],
                 dest: 'deploy/js/game.js'
+            },
+            options: {
+                bundleOptions: {
+                    debug: true
+                }
             }
         },
         bower_concat: {
