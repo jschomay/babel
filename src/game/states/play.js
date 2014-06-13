@@ -83,7 +83,7 @@ GameState.prototype.addScaffoldToPool = function(){
 };
 
 GameState.prototype.buildScaffold = function (x, y) {
-    var buildTime = Phaser.Timer.SECOND * 0.5;
+    var buildTime = Phaser.Timer.SECOND * 0.7;
     this.player.building = true;
     // Get a dead scaffold from the pool
     var scaffold = this.scaffoldPool.getFirstDead();
@@ -163,11 +163,11 @@ GameState.prototype.update = function() {
     // update inputs
 
     if (!this.player.isBusy() && this.leftInputIsActive()) {
-        this.targetPosition.body.reset(this.player.x - this.player.width, this.player.y + this.player.height);
+        this.targetPosition.body.reset(this.player.x - this.scaffoldPool.getAt(0).width, this.player.y + this.player.height);
         this.buildOrMove('left', this.player.walkLeft);
     }
     if (!this.player.isBusy() && this.rightInputIsActive()) {
-        this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y + this.player.height);
+        this.targetPosition.body.reset(this.player.x + this.scaffoldPool.getAt(0).width, this.player.y + this.player.height);
         this.buildOrMove('right', this.player.walkRight);
     }
 
@@ -188,6 +188,7 @@ GameState.prototype.buildOrMove = function(direction, moveFn) {
     // Collide the targetPosition with the scaffold
     if(this.game.physics.arcade.overlap(this.targetPosition, this.scaffoldPool)) {
         // scaffold exists to move to
+        // TODO - only climb if up is held for .5 sec
         moveFn.call(this.player);
     } else {
         // stop and build
