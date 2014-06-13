@@ -37,7 +37,7 @@ GameState.prototype.create = function() {
     }
 
     // lay some initial scaffolding
-    for(var x = 0; x < this.game.width; x += 32) {
+    for(var x = 0; x < this.game.width; x += 64) {
         this.buildScaffold(x, this.game.height - 32);
     }
 
@@ -64,6 +64,8 @@ GameState.prototype.create = function() {
 
 GameState.prototype.addScaffoldToPool = function(){
     var scaffold = this.game.add.sprite(0, 0, 'scaffold');
+    scaffold.name = 'scaffold'+this.scaffoldPool.length;
+    scaffold.scale.x = 2;
     this.scaffoldPool.add(scaffold);
 
     // Enable physics on the scaffold
@@ -99,6 +101,30 @@ GameState.prototype.buildScaffold = function (x, y) {
     this.game.time.events.add(buildTime, stopBuilding, this);
 
     return scaffold;
+};
+
+GameState.prototype.extendScaffold = function(anchorScaffold, direction) {
+    switch (direction) {
+        case 'up':
+        this.buildScaffold(anchorScaffold.x, anchorScaffold.y - anchorScaffold.height*3);
+        break;
+        case 'right':
+        this.buildScaffold(anchorScaffold.x + anchorScaffold.width, anchorScaffold.y);
+        break;
+        case 'left':
+        this.buildScaffold(anchorScaffold.x - anchorScaffold.width, anchorScaffold.y);
+        break;
+    }
+};
+
+GameState.prototype.getScaffoldUnderfoot = function() {
+    var scaffoldUnderFoot;
+    this.targetPosition.body.reset(this.player.x, this.player.y + this.player.height);
+    function collisionHandler(player, scaffold) {
+        scaffoldUnderFoot = scaffold;
+    }
+    this.game.physics.arcade.overlap(this.targetPosition, this.scaffoldPool, collisionHandler, null, this);
+    return scaffoldUnderFoot;
 };
 
 
@@ -138,21 +164,27 @@ GameState.prototype.update = function() {
 
     if (!this.player.isBusy() && this.leftInputIsActive()) {
         this.targetPosition.body.reset(this.player.x - this.player.width, this.player.y + this.player.height);
-        this.buildOrMove(this.player.walkLeft);
+        this.buildOrMove('left', this.player.walkLeft);
     }
     if (!this.player.isBusy() && this.rightInputIsActive()) {
         this.targetPosition.body.reset(this.player.x + this.player.width, this.player.y + this.player.height);
-        this.buildOrMove(this.player.walkRight);
+        this.buildOrMove('right', this.player.walkRight);
     }
 
     if (!this.player.isBusy() && this.upInputIsActive()) {
         this.player.body.acceleration.x = 0;
         this.targetPosition.body.reset(this.player.x, this.player.y - this.player.height*2);
-        this.buildOrMove(this.player.climb);
+        this.buildOrMove('up', this.player.climb);
     }
+
+    // for debugging actions //
+    if(this.input.keyboard.justPressed(Phaser.Keyboard.DOWN,1)){
+        this.getScaffoldUnderfoot();
+    }
+
 };
 
-GameState.prototype.buildOrMove = function(moveFn) {
+GameState.prototype.buildOrMove = function(direction, moveFn) {
     // Collide the targetPosition with the scaffold
     if(this.game.physics.arcade.overlap(this.targetPosition, this.scaffoldPool)) {
         // scaffold exists to move to
@@ -160,9 +192,10 @@ GameState.prototype.buildOrMove = function(moveFn) {
     } else {
         // stop and build
         this.player.body.acceleration.x = 0;
-        
-        // TODO - USE TARGET POS MATH TO BUILD SCAFFOLD IN RIGHT PLACE
-        this.buildScaffold(this.targetPosition.body.x, this.targetPosition.body.y);
+
+        // direction passed in as 'up', 'left', 'right'
+        anchorScaffold = this.getScaffoldUnderfoot();
+        this.extendScaffold(anchorScaffold, direction);
 
         // TODO - DON'T BUILD IF IT WILL BE OFF SCREEN
     }
@@ -210,7 +243,7 @@ GameState.prototype.upInputIsActive = function(duration) {
 
 GameState.prototype.render = function render() {
 
-    // game.debug.bodyInfo(sprite1, 32, 32);
+    // game.debug.bodyInfo(this.player, 32, 32);
 
     this.game.debug.body(this.targetPosition);
     this.game.debug.body(this.player);
