@@ -25,10 +25,10 @@ Player.prototype.walkRight = function() {
     this.body.acceleration.x += this.ACCELERATION;
 };
 
-Player.prototype.climb = function() {
+Player.prototype.climb = function(gameState) {
     this.climbing = true;
     var climbTween = this.game.add.tween(this.body);
-    climbTween.to({y: (this.body.y - this.height * 3)}, 1000, Phaser.Easing.Linear.None, true);
+    climbTween.to({y: (this.body.y - gameState.scaffoldPool.getAt(0).height)}, 500, Phaser.Easing.Linear.None, true);
     climbTween.onComplete.add(function() {
         this.climbing = false;
     }, this);
