@@ -83,7 +83,7 @@ GameState.prototype.addScaffoldToPool = function(){
 };
 
 GameState.prototype.buildScaffold = function (x, y) {
-    var buildTime = Phaser.Timer.SECOND * 0.7;
+    var buildTime = Phaser.Timer.SECOND * 0.6;
     this.player.building = true;
     // Get a dead scaffold from the pool
     var scaffold = this.scaffoldPool.getFirstDead();

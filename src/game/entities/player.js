@@ -2,8 +2,8 @@ module.exports = Player = function(game, x, y) {
     Phaser.Sprite.call(this, game, x, y, 'player');
 
     this.MAX_SPEED = 300; // pixels/second
-    this.ACCELERATION = 1500; // pixels/second/second
-    this.DRAG = 1500; // pixels/second
+    this.ACCELERATION = 2000; // pixels/second/second
+    this.DRAG = 2000; // pixels/second
     this.JUMP_SPEED = -1000; // pixels/second (negative y is up)
 
     game.physics.enable(this, Phaser.Physics.ARCADE);
