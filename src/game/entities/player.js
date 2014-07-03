@@ -27,7 +27,7 @@ Player.prototype.walkRight = function() {
 
 Player.prototype.climb = function(gameState) {
     var climbTime = 700;
-    var climbSpeed = gameState.scaffoldPool.getAt(0).height*1000/climbTime;
+    var climbSpeed = gameState.getScaffoldHeight()*1000/climbTime;
     this.climbing = true;
     this.body.allowGravity = false;
     this.body.velocity.y -= climbSpeed/6;

@@ -17,18 +17,6 @@ GameState.prototype.create = function() {
     this.GRAVITY = 2600; // pixels/second/second
     this.game.physics.arcade.gravity.y = this.GRAVITY;
 
-    var Player = require('../entities/player');
-    this.player = new Player(this.game, this.game.width/2, this.game.height/2 - 60);
-    this.game.add.existing(this.player);
-
-
-    // invisible helper object to determine if scaffolding exists in the direction pressed
-    this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
-    this.game.physics.enable(this.targetPosition, Phaser.Physics.ARCADE);
-    this.targetPosition.body.allowGravity = false;
-    this.targetPosition.body.setSize(10, 10, this.targetPosition.width/2-5, this.targetPosition.height/2-5);
-
-
 
     this.scaffoldPool = this.game.add.group();
 
@@ -38,9 +26,24 @@ GameState.prototype.create = function() {
         this.addScaffoldToPool();
     }
 
+    this.getScaffoldHeight = function () {return this.scaffoldPool.getAt(0).height;};
+    this.getScaffoldWidth = function () {return this.scaffoldPool.getAt(0).width;};
+
+    var Player = require('../entities/player');
+    this.player = new Player(this.game, this.game.width/2, this.game.height/2 - 60);
+    this.game.add.existing(this.player);
+
+
+    // invisible helper object to determine if scaffolding exists in the direction pressed
+    this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
+    this.game.physics.enable(this.targetPosition, Phaser.Physics.ARCADE);
+    this.targetPosition.body.allowGravity = false;
+    this.targetPosition.body.setSize(10, this.getScaffoldHeight()/2, this.targetPosition.width/2-5, this.targetPosition.height/2-5);
+
+
     // lay some initial scaffolding
-    for(var x = 0; x < this.game.width; x += this.scaffoldPool.getAt(0).width) {
-        this.buildScaffold(x, this.game.height/2 - this.scaffoldPool.getAt(0).height/2);
+    for(var x = 0; x < this.game.width; x += this.getScaffoldWidth()) {
+        this.buildScaffold(x, this.game.height/2 - this.getScaffoldHeight()/2);
     }
 
 
@@ -54,8 +57,6 @@ GameState.prototype.create = function() {
         Phaser.Keyboard.DOWN
     ]);
 
-    // Just for fun, draw some height markers so we can see how high we're jumping
-    this.drawHeightMarkers();
 
     // Show FPS
     this.game.time.advancedTiming = true;
@@ -169,16 +170,16 @@ GameState.prototype.update = function() {
     // update inputs
 
     if (!this.player.isBusy() && this.leftInputIsActive()) {
-        this.targetPosition.body.reset(this.player.x - this.scaffoldPool.getAt(0).width*4/5, playersFeet);
+        this.targetPosition.body.reset(this.player.x - this.getScaffoldWidth()*4/5, playersFeet);
         this.buildOrMove('left', this.player.walkLeft);
     }
     if (!this.player.isBusy() && this.rightInputIsActive()) {
-        this.targetPosition.body.reset(this.player.x + this.scaffoldPool.getAt(0).width*4/5, playersFeet);
+        this.targetPosition.body.reset(this.player.x + this.getScaffoldWidth()*4/5, playersFeet);
         this.buildOrMove('right', this.player.walkRight);
     }
     if (!this.player.isBusy() && this.upInputIsActive()) {
         this.player.body.acceleration.x = 0;
-        this.targetPosition.body.reset(this.player.x, playersFeet - this.scaffoldPool.getAt(0).height);
+        this.targetPosition.body.reset(this.player.x, playersFeet - this.getScaffoldHeight());
         this.buildOrMove('up', this.player.climb);
     }
 
