@@ -12,11 +12,13 @@ GameState.prototype.create = function() {
     // Set stage background to something sky colored
     this.game.stage.backgroundColor = 0x4488cc;
 
+    this.game.camera.bounds = null;
+
     this.GRAVITY = 2600; // pixels/second/second
     this.game.physics.arcade.gravity.y = this.GRAVITY;
 
     var Player = require('../entities/player');
-    this.player = new Player(this.game, this.game.width/2, this.game.height - 200);
+    this.player = new Player(this.game, this.game.width/2, this.game.height/2 - 60);
     this.game.add.existing(this.player);
 
 
@@ -38,7 +40,7 @@ GameState.prototype.create = function() {
 
     // lay some initial scaffolding
     for(var x = 0; x < this.game.width; x += this.scaffoldPool.getAt(0).width) {
-        this.buildScaffold(x, this.game.height - this.scaffoldPool.getAt(0).height-30);
+        this.buildScaffold(x, this.game.height/2 - this.scaffoldPool.getAt(0).height/2);
     }
 
 
@@ -106,6 +108,7 @@ GameState.prototype.buildScaffold = function (x, y) {
 };
 
 GameState.prototype.extendScaffold = function(anchorScaffold, direction) {
+    // TODO check for anchorScaffold, maybe here, or maybe in function that calls?
     switch (direction) {
         case 'up':
         this.buildScaffold(anchorScaffold.x, anchorScaffold.y - anchorScaffold.height);
@@ -121,7 +124,7 @@ GameState.prototype.extendScaffold = function(anchorScaffold, direction) {
 
 GameState.prototype.getScaffoldUnderfoot = function() {
     var scaffoldUnderFoot;
-    this.targetPosition.body.reset(this.player.x, this.player.y + this.player.height/2);
+    this.targetPosition.body.reset(this.player.x, this.player.y + this.player.height/2 + 5);
     function collisionHandler(player, scaffold) {
         scaffoldUnderFoot = scaffold;
     }
@@ -156,7 +159,7 @@ GameState.prototype.update = function() {
     // Collide the player with the scaffold
     this.game.physics.arcade.collide(this.player, this.scaffoldPool);
 
-    playersFeet = this.player.y+this.player.height/2;
+    var playersFeet = this.player.y+this.player.height/2 + 5;
 
     // targetPosition follows player
     this.targetPosition.body.reset(this.player.x, playersFeet);
@@ -173,7 +176,6 @@ GameState.prototype.update = function() {
         this.targetPosition.body.reset(this.player.x + this.scaffoldPool.getAt(0).width*4/5, playersFeet);
         this.buildOrMove('right', this.player.walkRight);
     }
-
     if (!this.player.isBusy() && this.upInputIsActive()) {
         this.player.body.acceleration.x = 0;
         this.targetPosition.body.reset(this.player.x, playersFeet - this.scaffoldPool.getAt(0).height);
@@ -184,7 +186,6 @@ GameState.prototype.update = function() {
     if(this.input.keyboard.justPressed(Phaser.Keyboard.DOWN,1)){
         this.getScaffoldUnderfoot();
     }
-
 };
 
 GameState.prototype.buildOrMove = function(direction, moveFn) {
@@ -251,5 +252,6 @@ GameState.prototype.render = function render() {
 
     this.game.debug.body(this.targetPosition);
     this.game.debug.body(this.player);
+    // this.game.debug.spriteBounds(this.player);
     this.scaffoldPool.forEach(function(scaffold){this.game.debug.body(scaffold);},this);
 };

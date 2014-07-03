@@ -26,12 +26,25 @@ Player.prototype.walkRight = function() {
 };
 
 Player.prototype.climb = function(gameState) {
+    // TODO ideas - stagger movement of player and scaffold, so it feels like climb then scroll
+    console.log('start climbing')
+    var climbTime = 700;
+    var climbSpeed = gameState.scaffoldPool.getAt(0).height*1000/climbTime;
     this.climbing = true;
-    var climbTween = this.game.add.tween(this.body);
-    climbTween.to({y: (this.body.y - gameState.scaffoldPool.getAt(0).height)}, 500, Phaser.Easing.Linear.None, true);
-    climbTween.onComplete.add(function() {
+    this.body.allowGravity = false;
+    this.body.velocity.y -= climbSpeed/5;
+    this.game.world.setAllChildren('body.velocity.y', climbSpeed, true, true, 1, false);
+
+    stopClimbig = function() {
+        console.log('stop climbing')
         this.climbing = false;
-    }, this);
+        this.body.velocity.y = 0;
+        this.body.allowGravity = true;
+        this.game.world.setAllChildren('body.velocity.y', 0, true, true, 0, false);
+    };
+
+    this.game.time.events.add(climbTime, stopClimbig, this);
+
 };
 
 Player.prototype.isBusy = function() {
