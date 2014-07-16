@@ -1,6 +1,8 @@
 module.exports = Player = function(game, x, y) {
     Phaser.Sprite.call(this, game, x, y, 'player');
 
+    this.revive();
+
     this.MAX_SPEED = 300; // pixels/second
     this.ACCELERATION = 2000; // pixels/second/second
     this.DRAG = 2000; // pixels/second
@@ -26,18 +28,18 @@ Player.prototype.walkRight = function() {
 };
 
 Player.prototype.climb = function(gameState) {
-    var climbTime = 700;
+    var climbTime = 1000;
     var climbSpeed = gameState.getScaffoldHeight()*1000/climbTime;
     this.climbing = true;
     this.body.allowGravity = false;
-    this.body.velocity.y -= climbSpeed/6;
+    this.body.velocity.y -= climbSpeed*1.1;
     this.game.world.setAllChildren('body.velocity.y', climbSpeed, true, true, 1, false);
 
     stopClimbing = function() {
         this.climbing = false;
         this.body.velocity.y = 0;
         this.body.allowGravity = true;
-        this.game.world.setAllChildren('body.velocity.y', 0, true, true, 0, false);
+        this.game.world.setAllChildren('body.velocity.y', climbSpeed, true, true, 2, false);
     };
 
     this.game.time.events.add(climbTime, stopClimbing, this);
