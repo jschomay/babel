@@ -5,6 +5,7 @@ module.exports = GameState = function(game) {
 GameState.prototype.preload = function() {
     this.game.load.image('scaffold', '/assets/scaffold.png');
     this.game.load.image('player', '/assets/player.png');
+    this.game.load.image('water', '/assets/water.png');
 };
 
 // Setup the example
@@ -17,7 +18,7 @@ GameState.prototype.create = function() {
     this.GRAVITY = 2600; // pixels/second/second
     this.game.physics.arcade.gravity.y = this.GRAVITY;
 
-
+    // add scaffold (group)
     this.scaffoldPool = this.game.add.group();
 
     // start scaffold pool with 100 pieces
@@ -29,10 +30,15 @@ GameState.prototype.create = function() {
     this.getScaffoldHeight = function () {return this.scaffoldPool.getAt(0).height;};
     this.getScaffoldWidth = function () {return this.scaffoldPool.getAt(0).width;};
 
+    // add player
     var Player = require('../entities/player');
     this.player = new Player(this.game, this.game.width/2, this.game.height/2 - 60);
     this.game.add.existing(this.player);
 
+    // add water
+    var Water = require('../entities/water');
+    this.water = new Water(this.game, 0, this.game.height);
+    this.game.add.existing(this.water);
 
     // invisible helper object to determine if scaffolding exists in the direction pressed
     this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
@@ -253,6 +259,7 @@ GameState.prototype.render = function render() {
 
     this.game.debug.body(this.targetPosition);
     this.game.debug.body(this.player);
+    this.game.debug.body(this.water);
     // this.game.debug.spriteBounds(this.player);
     this.scaffoldPool.forEach(function(scaffold){this.game.debug.body(scaffold);},this);
 };
