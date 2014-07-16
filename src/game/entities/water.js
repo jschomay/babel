@@ -10,6 +10,7 @@ module.exports = Water = function(game, x, y) {
     this.body.allowGravity = false;
     this.scale.x = 30;
     this.scale.y = 20;
+    this.alpha = 0.7;
 };
 
 Water.prototype = Object.create(Phaser.Sprite.prototype);

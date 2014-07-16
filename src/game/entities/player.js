@@ -20,14 +20,17 @@ Player.prototype.constructor = Player;
 
 // player movements
 Player.prototype.walkLeft = function() {
+    if (!this.alive) return;
     this.body.acceleration.x += -this.ACCELERATION;
 };
 
 Player.prototype.walkRight = function() {
+    if (!this.alive) return;
     this.body.acceleration.x += this.ACCELERATION;
 };
 
 Player.prototype.climb = function(gameState) {
+    if (!this.alive) return;
     var climbTime = 1000;
     var climbSpeed = gameState.getScaffoldHeight()*1000/climbTime;
     this.climbing = true;
@@ -43,7 +46,19 @@ Player.prototype.climb = function(gameState) {
     };
 
     this.game.time.events.add(climbTime, stopClimbing, this);
+};
 
+Player.prototype.drown = function() {
+    this.alive = false;
+    // todo - this probably isn't quite right to disable collisions, but enable=false isn't working?
+    this.body.immovable = true;
+    this.body.allowGravity = false;
+    this.body.collideWorldBounds = false;
+    this.body.outOfBoundsKill = true;
+    this.body.acceleration.y = 11;
+    this.body.acceleration.x = 8;
+    this.body.maxVelocity.setTo(20,30);
+    // this.game.add.tween(this).to( { y: this.game.height, x: this.body.x+20 }, 2000, Phaser.Easing.Linear.None, true);
 };
 
 Player.prototype.isBusy = function() {

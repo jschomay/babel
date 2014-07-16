@@ -171,9 +171,20 @@ GameState.prototype.update = function() {
     // targetPosition follows player
     this.targetPosition.body.reset(this.player.x, playersFeet);
 
-    this.player.body.acceleration.x = 0;
+    if (this.water.body.y < this.player.body.y) {
+        // you drowned!
+        this.lose();
+    }
+    if (this.water.body.y < -20) {
+        // stop water from moving beyond top of screen
+        this.water.body.velocity.y = 0;
+    }
+
 
     // update inputs
+    if (!this.player.alive) return;
+
+    this.player.body.acceleration.x = 0;
 
     if (!this.player.isBusy() && this.leftInputIsActive()) {
         this.targetPosition.body.reset(this.player.x - this.getScaffoldWidth()*4/5, playersFeet);
@@ -193,6 +204,11 @@ GameState.prototype.update = function() {
     if(this.input.keyboard.justPressed(Phaser.Keyboard.DOWN,1)){
         this.getScaffoldUnderfoot();
     }
+};
+
+GameState.prototype.lose = function() {
+    this.game.stage.backgroundColor = "ff0000";
+    this.player.drown();
 };
 
 GameState.prototype.buildOrMove = function(direction, moveFn) {
@@ -257,9 +273,9 @@ GameState.prototype.render = function render() {
 
     // game.debug.bodyInfo(this.player, 32, 32);
 
-    this.game.debug.body(this.targetPosition);
-    this.game.debug.body(this.player);
-    this.game.debug.body(this.water);
+    // this.game.debug.body(this.targetPosition);
+    // this.game.debug.body(this.player);
+    // this.game.debug.body(this.water);
     // this.game.debug.spriteBounds(this.player);
-    this.scaffoldPool.forEach(function(scaffold){this.game.debug.body(scaffold);},this);
+    // this.scaffoldPool.forEach(function(scaffold){this.game.debug.body(scaffold);},this);
 };
