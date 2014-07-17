@@ -49,7 +49,11 @@ GameState.prototype.create = function() {
 
     // lay some initial scaffolding
     for(var x = 0; x < this.game.width; x += this.getScaffoldWidth()) {
-        this.buildScaffold(x, this.game.height/2 - this.getScaffoldHeight()/2);
+        for(var y = this.game.height/2; y < this.game.height; y += this.getScaffoldHeight()) {
+            if (y < this.game.height/2 + this.getScaffoldHeight()*2 || (x + this.getScaffoldWidth() < this.game.width/3 || x > this.game.width*2/3)) {
+                this.buildScaffold(x, y);
+            }
+        }
     }
 
 
