@@ -37,7 +37,7 @@ GameState.prototype.create = function() {
 
     // add water
     var Water = require('../entities/water');
-    this.water = new Water(this.game, 0, this.game.height);
+    this.water = new Water(this.game, this.game.width/2, this.game.height);
     this.game.add.existing(this.water);
 
     // invisible helper object to determine if scaffolding exists in the direction pressed
