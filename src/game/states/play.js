@@ -36,9 +36,10 @@ GameState.prototype.create = function() {
     this.game.add.existing(this.player);
 
     // add water
-    var Water = require('../entities/water');
-    this.water = new Water(this.game, this.game.width/2, this.game.height);
-    this.game.add.existing(this.water);
+    // var Water = require('../entities/water');
+    // this.water = new Water(this.game, this.game.width/2, this.game.height);
+    // this.game.add.existing(water);
+    this.water = require('../entities/water')(this.game);
 
     // invisible helper object to determine if scaffolding exists in the direction pressed
     this.targetPosition = this.game.add.sprite(this.player.x, this.player.y);
@@ -175,13 +176,15 @@ GameState.prototype.update = function() {
     // targetPosition follows player
     this.targetPosition.body.reset(this.player.x, playersFeet);
 
-    if (this.water.body.y < this.player.body.y) {
+    if (this.water.getAt(0).body.y < this.player.body.y) {
         // you drowned!
         this.lose();
     }
-    if (this.water.body.y < -20) {
+    if (this.water.getAt(0).body.y < -20) {
         // stop water from moving beyond top of screen
-        this.water.body.velocity.y = 0;
+        this.water.getAt(0).body.velocity.y = 0;
+        this.water.getAt(1).body.velocity.y = 0;
+        this.water.getAt(2).body.velocity.y = 0;
     }
 
 
